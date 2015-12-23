@@ -1,0 +1,30 @@
+From c30a8f9adbf5cdc9ec3c6bab51df02126a04dbbf Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Tue, 4 Aug 2015 00:41:15 +0530
+Subject: [PATCH 21/31] add check_access in _do_cap_update
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Locker.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
+index 64a17fe..22fe7bb 100644
+--- a/src/mds/Locker.cc
++++ b/src/mds/Locker.cc
+@@ -3070,6 +3070,12 @@ bool Locker::_do_cap_update(CInode *in, Capability *cap,
+   if (!dirty && !change_max)
+     return false;
+ 
++  Session *session = static_cast<Session *>(m->get_connection()->get_priv());
++  if (!session->check_access(in, MAY_WRITE, 0, 0, 0, 0)) {
++    dout(10) << "check_access failed, dropping cap update on " << *in << dendl;
++    return false;
++  }
++  session->put();
+ 
+   // do the update.
+   EUpdate *le = new EUpdate(mds->mdlog, "cap update");
+-- 
+1.9.1
+

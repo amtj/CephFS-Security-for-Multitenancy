@@ -1,0 +1,26 @@
+From 2004912eb6754e8666463636bd2d7f054dff0d41 Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Wed, 12 Aug 2015 21:08:02 +0530
+Subject: [PATCH 24/31] fix test_path_caps
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ qa/workunits/fs/test_path_caps.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/qa/workunits/fs/test_path_caps.sh b/qa/workunits/fs/test_path_caps.sh
+index aef6950..328f0ba 100755
+--- a/qa/workunits/fs/test_path_caps.sh
++++ b/qa/workunits/fs/test_path_caps.sh
+@@ -14,7 +14,7 @@ cleanup()
+ 	rm -rf mnt.admin/foo mnt.admin/bar
+ 	fusermount -u mnt.foo
+ 	fusermount -u mnt.admin
+-	rmdir mnt.admin mnt.foo
++	rm -rf mnt.admin mnt.foo
+ }
+ 
+ trap cleanup INT TERM EXIT
+-- 
+1.9.1
+

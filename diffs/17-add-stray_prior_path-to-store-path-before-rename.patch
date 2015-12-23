@@ -1,0 +1,25 @@
+From 23ab3df02faa27b08226a736d3dff1552759f238 Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Wed, 29 Jul 2015 00:37:34 +0530
+Subject: [PATCH 17/31] add stray_prior_path to store path before rename
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 4c148e3..49eeae5 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -6583,6 +6583,7 @@ void Server::_rename_prepare(MDRequestRef& mdr,
+     }
+     if (tpi) {
+       tpi->ctime = mdr->get_op_stamp();
++      destdn->make_path_string(tpi->stray_prior_path);
+       tpi->nlink--;
+       if (tpi->nlink == 0)
+ 	oldin->state_set(CInode::STATE_ORPHAN);
+-- 
+1.9.1
+

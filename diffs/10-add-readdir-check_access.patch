@@ -1,0 +1,27 @@
+From 1d02a2b0aca3c840bb9a8dccb130cda38c17e488 Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Tue, 21 Jul 2015 22:38:20 +0530
+Subject: [PATCH 10/31] add readdir check_access
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 3ebaec3..9da93c2 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -3178,6 +3178,9 @@ void Server::handle_client_readdir(MDRequestRef& mdr)
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
+ 
++  if (!check_access(mdr, diri, MAY_READ))
++    return;
++
+   // which frag?
+   frag_t fg = (__u32)req->head.args.readdir.frag;
+   string offset_str = req->get_path2();
+-- 
+1.9.1
+

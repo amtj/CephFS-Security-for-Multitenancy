@@ -1,0 +1,28 @@
+From 25f541fad09d3bc5e6586fe3f84de91279487079 Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Fri, 10 Jul 2015 19:50:15 +0530
+Subject: [PATCH 03/31] mds/Server.cc: drop leading / from path in
+ is_capable check
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index b7f5dae..1a0bff3 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -2100,6 +2100,9 @@ bool Server::check_access(MDRequestRef& mdr, CInode *in, unsigned mask)
+   //path calculation
+   in->make_path_string(path, false, in->get_projected_parent_dn());
+ 
++  //drop leading /
++  if (path.length()) path = path.substr(1);
++
+   // FIXME: it depends on the inode!
+   if (s->auth_caps.is_capable(path, in->inode.uid, in->inode.gid, in->inode.mode,
+ 			      uid, mask)) {
+-- 
+1.9.1
+

@@ -1,0 +1,101 @@
+From 04d8fcba6fd4f652bf80a56855469d56ea572407 Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Tue, 4 Aug 2015 00:18:38 +0530
+Subject: [PATCH 20/31] move _check_access to SessionMap
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc     | 27 +--------------------------
+ src/mds/SessionMap.cc | 24 ++++++++++++++++++++++++
+ src/mds/SessionMap.h  |  2 ++
+ 3 files changed, 27 insertions(+), 26 deletions(-)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index b11b717..f3822e1 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -2086,34 +2086,9 @@ void Server::handle_slave_auth_pin_ack(MDRequestRef& mdr, MMDSSlaveRequest *ack)
+  * by mask on the given inode, based on the capability in the mdr's
+  * session.
+  */
+-bool Server::_check_access(Session *session, CInode *in, unsigned mask, int caller_uid, int caller_gid, int setattr_uid, int setattr_gid)
+-{
+-  string path;
+-
+-  if (in->is_stray()){
+-    path = in->get_projected_inode()->stray_prior_path;
+-  } else {
+-    in->make_path_string(path, false, in->get_projected_parent_dn());
+-  }
+-  if (path.length())
+-    path = path.substr(1);    // drop leading /
+-
+-  if ((mask & (MAY_CHOWN|MAY_CHGRP)) &&
+-    !(session->auth_caps.is_capable(path, in->inode.uid, in->inode.gid, in->inode.mode,
+-                  caller_uid, caller_gid, mask))) {
+-    return false;
+-  }
+-
+-  if (session->auth_caps.is_capable(path, in->inode.uid, in->inode.gid, in->inode.mode,
+-            caller_uid, caller_gid, mask)) {
+-    return true;
+-  }
+-  return false;
+-}
+-
+ bool Server::check_access(MDRequestRef& mdr, CInode *in, unsigned mask)
+ {
+- if (!_check_access(mdr->session, in, MAY_WRITE, mdr->client_request->get_caller_uid(), mdr->client_request->get_caller_gid(),
++ if (!mdr->session->check_access(in, MAY_WRITE, mdr->client_request->get_caller_uid(), mdr->client_request->get_caller_gid(),
+         mdr->client_request->head.args.setattr.uid, mdr->client_request->head.args.setattr.gid)){
+     respond_to_request(mdr, -EACCES);
+   }
+diff --git a/src/mds/SessionMap.cc b/src/mds/SessionMap.cc
+index faaeb26..7ce4695 100644
+--- a/src/mds/SessionMap.cc
++++ b/src/mds/SessionMap.cc
+@@ -828,4 +828,28 @@ void SessionMap::save_if_dirty(const std::set<entity_name_t> &tgt_sessions,
+   }
+ }
+ 
++bool Session::check_access(CInode *in, unsigned mask, int caller_uid, int caller_gid, int setattr_uid, int setattr_gid)
++{
++  string path;
++
++  if (in->is_stray()){
++    path = in->get_projected_inode()->stray_prior_path;
++  } else {
++    in->make_path_string(path, false, in->get_projected_parent_dn());
++  }
++  if (path.length())
++    path = path.substr(1);    // drop leading /
++
++  if ((mask & (MAY_CHOWN|MAY_CHGRP)) &&
++    !(auth_caps.is_capable(path, in->inode.uid, in->inode.gid, in->inode.mode,
++                  caller_uid, caller_gid, mask))) {
++    return false;
++  }
++
++  if (auth_caps.is_capable(path, in->inode.uid, in->inode.gid, in->inode.mode,
++            caller_uid, caller_gid, mask)) {
++    return true;
++  }
++  return false;
++}
+ 
+diff --git a/src/mds/SessionMap.h b/src/mds/SessionMap.h
+index b24886f..1342427 100644
+--- a/src/mds/SessionMap.h
++++ b/src/mds/SessionMap.h
+@@ -276,6 +276,8 @@ public:
+     completed_requests_dirty = false;
+   }
+ 
++  bool check_access(CInode *in, unsigned mask, int caller_uid, int caller_gid, int setattr_uid, int setattr_gid);
++
+ 
+   Session() : 
+     state(STATE_CLOSED), state_seq(0), importing_count(0),
+-- 
+1.9.1
+

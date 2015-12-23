@@ -1,0 +1,57 @@
+From 5a55c86d5bbfd0782e50cb71f06057adcbdfb57f Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Wed, 22 Jul 2015 01:03:27 +0530
+Subject: [PATCH 12/31] add snaps(ls,mk,rm,rename) check_access
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index f1c39ef..85c5984 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -7707,6 +7707,9 @@ void Server::handle_client_lssnap(MDRequestRef& mdr)
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
+ 
++  if (!check_access(mdr, diri, MAY_READ))
++    return;
++
+   SnapRealm *realm = diri->find_snaprealm();
+   map<snapid_t,SnapInfo*> infomap;
+   realm->get_snap_info(infomap, diri->get_oldest_snap());
+@@ -7807,6 +7810,9 @@ void Server::handle_client_mksnap(MDRequestRef& mdr)
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
+ 
++  if (!check_access(mdr, diri, MAY_WRITE))
++    return;
++
+   // make sure name is unique
+   if (diri->snaprealm &&
+       diri->snaprealm->exists(snapname)) {
+@@ -7954,6 +7960,9 @@ void Server::handle_client_rmsnap(MDRequestRef& mdr)
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
+ 
++  if (!check_access(mdr, diri, MAY_WRITE))
++    return;
++
+   // prepare
+   if (!mdr->more()->stid) {
+     mds->snapclient->prepare_destroy(diri->ino(), snapid,
+@@ -8094,6 +8103,9 @@ void Server::handle_client_renamesnap(MDRequestRef& mdr)
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
+ 
++  if (!check_access(mdr, diri, MAY_WRITE))
++    return;
++
+     // prepare
+   if (!mdr->more()->stid) {
+     mds->snapclient->prepare_update(diri->ino(), snapid, dstname, utime_t(),
+-- 
+1.9.1
+

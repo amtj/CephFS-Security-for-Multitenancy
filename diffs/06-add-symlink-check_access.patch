@@ -1,0 +1,36 @@
+From f48546cf64fc9d8e4911be6cd9bf89695e48dbb4 Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Wed, 15 Jul 2015 03:00:38 +0530
+Subject: [PATCH 06/31] add symlink check_access
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 0c711a4..5587ad6 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -4423,7 +4423,7 @@ void Server::handle_client_mknod(MDRequestRef& mdr)
+   rdlocks.insert(&diri->authlock);
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
+-  
++
+   if (!check_access(mdr, diri, MAY_WRITE))
+     return;
+ 
+@@ -4595,6 +4595,9 @@ void Server::handle_client_symlink(MDRequestRef& mdr)
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
+ 
++  if (!check_access(mdr, diri, MAY_WRITE))
++   return;
++
+   unsigned mode = S_IFLNK | 0777;
+   CInode *newi = prepare_new_inode(mdr, dn->get_dir(), inodeno_t(req->head.ino), mode);
+   assert(newi);
+-- 
+1.9.1
+

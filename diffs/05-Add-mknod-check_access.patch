@@ -1,0 +1,27 @@
+From d43a9b8f1910709efeb5998aa4d741e22abf2d5f Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Wed, 15 Jul 2015 02:59:43 +0530
+Subject: [PATCH 05/31] Add mknod check_access
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 1a0bff3..0c711a4 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -4423,6 +4423,9 @@ void Server::handle_client_mknod(MDRequestRef& mdr)
+   rdlocks.insert(&diri->authlock);
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
++  
++  if (!check_access(mdr, diri, MAY_WRITE))
++    return;
+ 
+   unsigned mode = req->head.args.mknod.mode;
+   if ((mode & S_IFMT) == 0)
+-- 
+1.9.1
+

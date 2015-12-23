@@ -1,0 +1,87 @@
+From a992681487bc9ff62e6dfad0c04aac184bcb686b Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Tue, 28 Jul 2015 22:24:36 +0530
+Subject: [PATCH 16/31] add stray_prior_path to store path before unlink
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc   |  1 +
+ src/mds/mdstypes.cc | 10 ++++++++--
+ src/mds/mdstypes.h  |  2 ++
+ 3 files changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 1e66ec1..8193293 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -5370,6 +5370,7 @@ void Server::_unlink_local(MDRequestRef& mdr, CDentry *dn, CDentry *straydn)
+   dn->pre_dirty();
+ 
+   inode_t *pi = in->project_inode();
++  dn->make_path_string(pi->stray_prior_path);
+   mdr->add_projected_inode(in); // do this _after_ my dn->pre_dirty().. we apply that one manually.
+   pi->version = in->pre_dirty();
+   pi->ctime = mdr->get_op_stamp();
+diff --git a/src/mds/mdstypes.cc b/src/mds/mdstypes.cc
+index 5525764..84dbb7a 100644
+--- a/src/mds/mdstypes.cc
++++ b/src/mds/mdstypes.cc
+@@ -256,7 +256,7 @@ void inline_data_t::decode(bufferlist::iterator &p)
+  */
+ void inode_t::encode(bufferlist &bl) const
+ {
+-  ENCODE_START(11, 6, bl);
++  ENCODE_START(12, 6, bl);
+ 
+   ::encode(ino, bl);
+   ::encode(rdev, bl);
+@@ -298,12 +298,14 @@ void inode_t::encode(bufferlist &bl) const
+   ::encode(inline_data, bl);
+   ::encode(quota, bl);
+ 
++  ::encode(stray_prior_path, bl);
++
+   ENCODE_FINISH(bl);
+ }
+ 
+ void inode_t::decode(bufferlist::iterator &p)
+ {
+-  DECODE_START_LEGACY_COMPAT_LEN(11, 6, 6, p);
++  DECODE_START_LEGACY_COMPAT_LEN(12, 6, 6, p);
+ 
+   ::decode(ino, p);
+   ::decode(rdev, p);
+@@ -367,6 +369,8 @@ void inode_t::decode(bufferlist::iterator &p)
+     backtrace_version = 0; // force update backtrace
+   if (struct_v >= 11)
+     ::decode(quota, p);
++  if (struct_v >= 12)
++    ::decode(stray_prior_path, p);
+ 
+   DECODE_FINISH(p);
+ }
+@@ -430,6 +434,8 @@ void inode_t::dump(Formatter *f) const
+   f->dump_unsigned("file_data_version", file_data_version);
+   f->dump_unsigned("xattr_version", xattr_version);
+   f->dump_unsigned("backtrace_version", backtrace_version);
++
++  f->dump_string("stray_prior_path", stray_prior_path);
+ }
+ 
+ void inode_t::generate_test_instances(list<inode_t*>& ls)
+diff --git a/src/mds/mdstypes.h b/src/mds/mdstypes.h
+index 0bffe4b..f31c574 100644
+--- a/src/mds/mdstypes.h
++++ b/src/mds/mdstypes.h
+@@ -461,6 +461,8 @@ struct inode_t {
+ 
+   snapid_t oldest_snap;
+ 
++  string stray_prior_path; //stores path before unlink
++
+   inode_t() : ino(0), rdev(0),
+ 	      mode(0), uid(0), gid(0), nlink(0),
+ 	      size(0), max_size_ever(0),
+-- 
+1.9.1
+

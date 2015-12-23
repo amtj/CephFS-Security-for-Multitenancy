@@ -1,0 +1,37 @@
+From 804e47c84f5e8de0accaf653c78e74143d53a164 Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Fri, 24 Jul 2015 21:42:43 +0530
+Subject: [PATCH 15/31] add open check_access
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 9db44c8..1e66ec1 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -2876,6 +2876,9 @@ void Server::handle_client_open(MDRequestRef& mdr)
+     if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+       return;
+ 
++    if (!check_access(mdr, cur, MAY_WRITE))
++    return;
++
+     // wait for pending truncate?
+     const inode_t *pi = cur->get_projected_inode();
+     if (pi->is_truncating()) {
+@@ -3080,6 +3083,9 @@ void Server::handle_client_openc(MDRequestRef& mdr)
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
+ 
++  if (!check_access(mdr, diri, MAY_WRITE))
++    return;
++
+   CDentry::linkage_t *dnl = dn->get_projected_linkage();
+ 
+   if (!dnl->is_null()) {
+-- 
+1.9.1
+

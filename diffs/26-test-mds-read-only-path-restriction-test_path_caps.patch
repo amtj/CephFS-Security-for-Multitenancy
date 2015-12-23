@@ -1,0 +1,60 @@
+From d4bdb781a511943f329d1ff1263b8de41aa3077c Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Wed, 12 Aug 2015 22:25:43 +0530
+Subject: [PATCH 26/31] test:mds read-only path restriction test_path_caps
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ qa/workunits/fs/test_path_read-only.sh | 39 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 39 insertions(+)
+ create mode 100644 qa/workunits/fs/test_path_read-only.sh
+
+diff --git a/qa/workunits/fs/test_path_read-only.sh b/qa/workunits/fs/test_path_read-only.sh
+new file mode 100644
+index 0000000..96f3eb4
+--- /dev/null
++++ b/qa/workunits/fs/test_path_read-only.sh
+@@ -0,0 +1,39 @@
++#!/bin/sh -ex
++
++mkdir -p mnt.admin mnt.foo
++
++./ceph-fuse -n client.admin mnt.admin
++mkdir mnt.admin/bar
++touch mnt.admin/out mnt.admin/bar/out
++echo READ TEST PASSED >> mnt.admin/out
++echo READ TEST IN TREE PASSED >>mnt.admin/bar/out
++
++./ceph auth get-or-create client.foo mon 'allow r' mds 'allow r' osd 'allow rwx' >> keyring
++./ceph-fuse -n client.foo mnt.foo
++
++cleanup()
++{
++  rm -rf mnt.admin/bar
++  rm mnt.admin/out
++  fusermount -u mnt.foo
++  fusermount -u mnt.admin
++  rm -rf mnt.admin mnt.foo
++}
++
++trap cleanup INT TERM EXIT
++
++expect_false()
++{
++  if "$@"; then return 1;
++  else return 0;
++  fi
++}
++
++# write operations are not allowed
++expect_false mkdir mnt.foo/newdir
++expect_false touch newfile
++expect_false touch mnt.foo/bar/newfile
++
++# read-only operations are allowed
++cat mnt.foo/out
++cat mnt.foo/bar/out
+\ No newline at end of file
+-- 
+1.9.1
+

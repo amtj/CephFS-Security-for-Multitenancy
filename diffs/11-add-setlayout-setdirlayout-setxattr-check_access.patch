@@ -1,0 +1,48 @@
+From 58eb1629df33692281251aa0bdbe58f2906c1833 Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Tue, 21 Jul 2015 22:40:00 +0530
+Subject: [PATCH 11/31] add setlayout, setdirlayout, setxattr
+ check_access
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 9da93c2..f1c39ef 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -3790,6 +3790,9 @@ void Server::handle_client_setlayout(MDRequestRef& mdr)
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
+ 
++  if (!check_access(mdr, cur, MAY_WRITE))
++    return;
++
+   // project update
+   inode_t *pi = cur->project_inode();
+   pi->layout = layout;
+@@ -3831,6 +3834,9 @@ void Server::handle_client_setdirlayout(MDRequestRef& mdr)
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
+ 
++  if (!check_access(mdr, cur, MAY_WRITE))
++    return;
++
+   // validate layout
+   const inode_t *old_pi = cur->get_projected_inode();
+   ceph_file_layout layout;
+@@ -4259,6 +4265,9 @@ void Server::handle_client_setxattr(MDRequestRef& mdr)
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
+ 
++  if (!check_access(mdr, cur, MAY_WRITE))
++    return;
++
+   map<string, bufferptr> *pxattrs = cur->get_projected_xattrs();
+   if ((flags & CEPH_XATTR_CREATE) && pxattrs->count(name)) {
+     dout(10) << "setxattr '" << name << "' XATTR_CREATE and EEXIST on " << *cur << dendl;
+-- 
+1.9.1
+

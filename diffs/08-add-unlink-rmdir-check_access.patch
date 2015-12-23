@@ -1,0 +1,47 @@
+From 30f297e27c418a6951532789885d864ca7fc5c75 Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Wed, 15 Jul 2015 19:13:19 +0530
+Subject: [PATCH 08/31] add unlink, rmdir check_access
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 5587ad6..3ebaec3 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -5198,6 +5198,8 @@ void Server::handle_client_unlink(MDRequestRef& mdr)
+     return;
+   }
+ 
++  CInode *diri = dn->get_dir()->get_inode();
++  
+   CDentry::linkage_t *dnl = dn->get_linkage(client, mdr);
+   assert(!dnl->is_null());
+ 
+@@ -5246,8 +5248,8 @@ void Server::handle_client_unlink(MDRequestRef& mdr)
+   for (int i=0; i<(int)trace.size()-1; i++)
+     rdlocks.insert(&trace[i]->lock);
+   xlocks.insert(&dn->lock);
+-  wrlocks.insert(&dn->get_dir()->inode->filelock);
+-  wrlocks.insert(&dn->get_dir()->inode->nestlock);
++  wrlocks.insert(&diri->filelock);
++  wrlocks.insert(&diri->nestlock);
+   xlocks.insert(&in->linklock);
+   if (straydn) {
+     wrlocks.insert(&straydn->get_dir()->inode->filelock);
+@@ -5261,6 +5263,9 @@ void Server::handle_client_unlink(MDRequestRef& mdr)
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
+ 
++  if (!check_access(mdr, diri, MAY_WRITE))
++    return;
++  
+   if (in->is_dir() &&
+       _dir_is_nonempty(mdr, in)) {
+     respond_to_request(mdr, -ENOTEMPTY);
+-- 
+1.9.1
+

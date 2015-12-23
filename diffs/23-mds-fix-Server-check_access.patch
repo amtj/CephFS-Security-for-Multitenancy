@@ -1,0 +1,28 @@
+From e98611142bb438cf6b06e09a6d912abbbf568813 Mon Sep 17 00:00:00 2001
+From: "Yan, Zheng" <zyan@redhat.com>
+Date: Mon, 10 Aug 2015 16:31:53 +0800
+Subject: [PATCH 23/31] mds: fix Server::check_access
+
+Signed-off-by: Yan, Zheng <zyan@redhat.com>
+---
+ src/mds/Server.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 17fad22..d4cd7d0 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -2100,8 +2100,9 @@ bool Server::check_access(MDRequestRef& mdr, CInode *in, unsigned mask)
+  if (!mdr->session->check_access(in, MAY_WRITE, mdr->client_request->get_caller_uid(), mdr->client_request->get_caller_gid(),
+         mdr->client_request->head.args.setattr.uid, mdr->client_request->head.args.setattr.gid)){
+     respond_to_request(mdr, -EACCES);
++    return false;
+   }
+-  return false;
++  return true;
+ }
+ 
+ /** validate_dentry_dir
+-- 
+1.9.1
+

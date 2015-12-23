@@ -1,0 +1,28 @@
+From 3fd3a4654202014ecb7bbd17565b5b3226beec85 Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Thu, 9 Jul 2015 19:11:12 +0530
+Subject: [PATCH 02/31] mds: mkdir check_access
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 0225b8e..b7f5dae 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -4509,6 +4509,10 @@ void Server::handle_client_mkdir(MDRequestRef& mdr)
+   if (!mds->locker->acquire_locks(mdr, rdlocks, wrlocks, xlocks))
+     return;
+ 
++  // mkdir check access
++  if (!check_access(mdr, diri, MAY_WRITE))
++    return;
++
+   // new inode
+   SnapRealm *realm = dn->get_dir()->inode->find_snaprealm();
+   snapid_t follows = realm->get_newest_seq();
+-- 
+1.9.1
+

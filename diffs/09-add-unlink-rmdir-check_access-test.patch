@@ -1,0 +1,44 @@
+From ea5b4a1015b1090f32919dc53e2e5c12128b75e1 Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Wed, 15 Jul 2015 19:26:40 +0530
+Subject: [PATCH 09/31] add unlink, rmdir check_access test
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ qa/workunits/fs/test_path_caps.sh | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/qa/workunits/fs/test_path_caps.sh b/qa/workunits/fs/test_path_caps.sh
+index 10ca3fd..aef6950 100755
+--- a/qa/workunits/fs/test_path_caps.sh
++++ b/qa/workunits/fs/test_path_caps.sh
+@@ -3,7 +3,8 @@
+ mkdir -p mnt.admin mnt.foo
+ 
+ ./ceph-fuse -n client.admin mnt.admin
+-mkdir -p mnt.admin/foo mnt.admin/bar
++mkdir -p mnt.admin/foo/p mnt.admin/bar/q
++touch mnt.admin/foo/r mnt.admin/bar/s
+ 
+ ./ceph auth get-or-create client.foo mon 'allow r' mds 'allow r, allow rw path=/foo' osd 'allow rwx' >> keyring
+ ./ceph-fuse -n client.foo mnt.foo
+@@ -30,11 +31,15 @@ mkdir mnt.foo/foo/x
+ mkdir mnt.foo/foo/y
+ ln -s symlink mnt.foo/foo/x
+ ln -s symlink mnt.foo/foo/y
++unlink mnt.foo/foo/r
++rmdir mnt.foo/foo/p
+ 
+ # everything else is not
+ expect_false mkdir mnt.foo/bar/x
+ expect_false mkdir mnt.foo/food
+ expect_false ln -s symlink mnt.foo/x
+-expect_false ln -s symlink mnt.foo/foo
++expect_false ln -s symlink mnt.foo/food
++expect_false unlink mnt.foo/bar/s
++expect_false rmdir mnt.foo/bar/q
+ 
+ echo PASS
+-- 
+1.9.1
+

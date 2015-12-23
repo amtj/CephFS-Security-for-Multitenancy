@@ -1,0 +1,33 @@
+From 36209c40bb22258dd613ea33f4a4c60d1637a019 Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Wed, 22 Jul 2015 01:05:37 +0530
+Subject: [PATCH 13/31] add rename check_access
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 85c5984..582f0fd 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -6130,6 +6130,15 @@ void Server::handle_client_rename(MDRequestRef& mdr)
+ 				  &remote_wrlocks, auth_pin_freeze))
+     return;
+ 
++  if (!check_access(mdr, srcdn->get_dir()->get_inode(), MAY_WRITE))
++    return;
++
++  if (!check_access(mdr, destdn->get_dir()->get_inode(), MAY_WRITE))
++    return;
++
++  if (!check_access(mdr, srci, MAY_WRITE))
++    return;
++
+   if (oldin &&
+       oldin->is_dir() &&
+       _dir_is_nonempty(mdr, oldin)) {
+-- 
+1.9.1
+

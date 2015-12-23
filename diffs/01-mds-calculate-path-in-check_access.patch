@@ -1,0 +1,27 @@
+From 1eb43607cb357a6b90e49545d5e27ca915b203f5 Mon Sep 17 00:00:00 2001
+From: Jashan Kamboj <jashank42@gmail.com>
+Date: Tue, 16 Jun 2015 02:50:55 +0530
+Subject: [PATCH 01/31] mds: calculate path in check_access()
+
+Signed-off-by: Jashan Kamboj <jashank42@gmail.com>
+---
+ src/mds/Server.cc | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index 70ba321..2021413 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -2097,6 +2097,9 @@ bool Server::check_access(MDRequestRef& mdr, CInode *in, unsigned mask)
+   // FIXME: behave with hard links
+   string path;
+ 
++  //path calculation
++  in->make_path_string(path, false, in->get_projected_parent());
++
+   // FIXME: it depends on the inode!
+   if (s->auth_caps.is_capable(path, in->inode.uid, in->inode.gid, in->inode.mode,
+ 			      uid, mask)) {
+-- 
+1.9.1
+
