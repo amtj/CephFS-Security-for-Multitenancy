@@ -13,3 +13,5 @@ then, incoming client requests are compared to those allowances to the directory
 (dentry) that the request is touching. Along with this, it performs a directory
 (dentry) comparison before it locks and after then a pretty simple generic check
 is added that verifies metadata about a file are in the right subtree.
+ 
+[Link to GSoC Archive](http://www.google-melange.com/gsoc/project/details/google/gsoc2015/jashank42/5668600916475904)
