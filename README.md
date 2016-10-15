@@ -14,4 +14,6 @@ then, incoming client requests are compared to those allowances to the directory
 (dentry) comparison before it locks and after then a pretty simple generic check
 is added that verifies metadata about a file are in the right subtree.
  
-[Link to GSoC Archive](http://www.google-melange.com/gsoc/project/details/google/gsoc2015/jashank42/5668600916475904)
+[GSoC Archive](http://www.google-melange.com/gsoc/project/details/google/gsoc2015/jashank42/5668600916475904)
+
+[Commits](https://github.com/ceph/ceph/commits/master?author=amtoj)
