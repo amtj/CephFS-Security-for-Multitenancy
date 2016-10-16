@@ -16,4 +16,4 @@ is added that verifies metadata about a file are in the right subtree.
  
 [GSoC Archive](http://www.google-melange.com/gsoc/project/details/google/gsoc2015/jashank42/5668600916475904)
 
-[Commits](https://github.com/ceph/ceph/commits/master?author=amtoj)
+[Commits](https://github.com/ceph/ceph/commits/master?author=iamtj)
